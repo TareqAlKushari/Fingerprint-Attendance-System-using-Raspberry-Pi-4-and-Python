@@ -20,18 +20,18 @@ list_data = []
 
 ##################################################
 def deletes():
-    if os.path.ismount('/media/pi/7C36-BFFC'):
+    if os.path.ismount('/media/pi/7C36-BFFC1'):
         # Use the USB flash drive as the storage device
-        storage_device = '/media/pi/7C36-BFFC'
+        storage_device = '/media/pi/7C36-BFFC1'
         os.remove(storage_device + '/fingerprint_registration.csv')
         return True
     
 
 def read_data():
     # Check if a USB flash drive or a micro SD card is mounted
-    if os.path.ismount('/media/pi/7C36-BFFC'):
+    if os.path.ismount('/media/pi/7C36-BFFC1'):
         # Use the USB flash drive as the storage device
-        storage_device = '/media/pi/7C36-BFFC'
+        storage_device = '/media/pi/7C36-BFFC1'
     elif os.path.ismount('/media/pi/SD'):
         # Use the micro SD card as the storage device
         storage_device = '/media/pi/SD'
@@ -53,9 +53,9 @@ def read_data():
 
 def fingerprint_data(data):
     # Check if a USB flash drive or a micro SD card is mounted
-    if os.path.ismount('/media/pi/7C36-BFFC'):
+    if os.path.ismount('/media/pi/7C36-BFFC1'):
         # Use the USB flash drive as the storage device
-        storage_device = '/media/pi/7C36-BFFC'
+        storage_device = '/media/pi/7C36-BFFC1'
     elif os.path.ismount('/media/pi/SD'):
         # Use the micro SD card as the storage device
         storage_device = '/media/pi/SD'
@@ -78,9 +78,9 @@ def fingerprint_data(data):
 # Define a function to save fingerprint data in a CSV file
 def save_fingerprint_data(data):
     # Check if a USB flash drive or a micro SD card is mounted
-    if os.path.ismount('/media/pi/7C36-BFFC'):
+    if os.path.ismount('/media/pi/7C36-BFFC1'):
         # Use the USB flash drive as the storage device
-        storage_device = '/media/pi/7C36-BFFC'
+        storage_device = '/media/pi/7C36-BFFC1'
     elif os.path.ismount('/media/pi/SD'):
         # Use the micro SD card as the storage device
         storage_device = '/media/pi/SD'
@@ -227,8 +227,10 @@ def enroll_finger(location):
     data = []
     data.insert((location - 1), name)
     fingerprint_data(data)
+    time.sleep(1)
     read_data()
-    print("Storing model # {}  {}" .format(location, list_data[(location - 1)]))
+    time.sleep(1)
+    print("Storing model # {}  {}" .format(location, list_data[int(location - 1)]))
     i = finger.store_model(location)
     if i == adafruit_fingerprint.OK:
         print("Stored")
@@ -387,11 +389,13 @@ def run_from_user():
         read_data()
         if get_fingerprint():
             print("Detected #", finger.finger_id, "with confidence", finger.confidence)
-            mylcd.text("# {} {} ".format(finger.finger_id, list_data[(int(finger.finger_id) - 1)]) , 1)
+            name_string = str(list_data[(int(finger.finger_id) - 1)])
+            now = datetime.datetime.now()
+            mylcd.text("# {} {} ".format(finger.finger_id, name_string[2:-2]) , 1)
+            mylcd.text("# {} ".format(now) , 2)
             time.sleep(2)
             mylcd.clear()
             # get the current date and time
-            now = datetime.datetime.now()
             list_data[(int(finger.finger_id) - 1)].append(now)
             # Save the fingerprint template in a CSV file on the storage device
             if save_fingerprint_data(list_data[(int(finger.finger_id) - 1)]):
